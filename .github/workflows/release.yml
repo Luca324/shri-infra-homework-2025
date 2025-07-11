@@ -41,5 +41,5 @@ jobs:
             git config --global user.email "actions@github.com"
             git branch releases/${{ github.run_number }}
             git push origin releases/${{ github.run_number }}
-            env:
+          env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Авторизация
