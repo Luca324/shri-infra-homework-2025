@@ -28,10 +28,18 @@ jobs:
               run: npm ci
             - name: Test
               run: npm run test
-    branch: 
+    create-branch:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
-            - name: Create branch
-              run: git branch releases/${{ github.run_number }}
-    
+        - uses: actions/checkout@v4
+          with:
+            fetch-depth: 0  # Получить всю историю (нужно для создания веток)
+
+        - name: Create and push branch
+          run: |
+            git config --global user.name "GitHub Actions"
+            git config --global user.email "actions@github.com"
+            git branch releases/${{ github.run_number }}
+            git push origin releases/${{ github.run_number }}
+            env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Авторизация
