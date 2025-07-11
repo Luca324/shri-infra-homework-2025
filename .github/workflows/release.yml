@@ -75,7 +75,7 @@ jobs:
             docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}
             docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}_latest
     create-tag:
-      needs: build-and-push
+      needs: [lint, test]
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v4
@@ -88,3 +88,53 @@ jobs:
             git config --global user.email "actions@github.com"
             git tag -a v${{ github.run_number }} -m "Release ${{ github.run_number }}"
             git push origin v${{ github.run_number }}
+    create-release-issue:
+      needs: [lint, test]
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+        
+        - name: Get commit history
+          id: changelog
+          run: |
+            LAST_TAG=$(git describe --tags --abbrev=0 || echo "")
+            if [ -z "$LAST_TAG" ]; then
+              COMMITS=$(git log --pretty=format:"- %h %s (%an)")
+            else
+              COMMITS=$(git log $LAST_TAG..HEAD --pretty=format:"- %h %s (%an)")
+            fi
+            echo "commits<<EOF" >> $GITHUB_OUTPUT
+            echo "$COMMITS" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+
+        - name: Create release issue
+          uses: actions/github-script@v6
+          with:
+            script: |
+              const { data: issue } = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Release v${{ github.run_number }}`,
+                body: `
+                  **Release Information**
+                  - Date: ${new Date().toISOString()}
+                  - Author: ${{ github.actor }}
+                  - Version: ${{ github.run_number }}
+                  
+                  **Docker Image**
+                  - \`cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}\`
+                  - \`cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}_latest\`
+                  
+                  **Changes since last release:**
+                  ${process.env.COMMITS || 'No changes detected'}
+                  
+                `,
+                labels: ['release']
+              });
+              console.log(`Created issue: ${issue.html_url}`);
+          env:
+            COMMITS: ${{ steps.changelog.outputs.commits }}
+
+            
