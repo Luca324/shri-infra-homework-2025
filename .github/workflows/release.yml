@@ -50,8 +50,13 @@ jobs:
         - uses: actions/checkout@v4
         
         - name: Login to Yandex Container Registry
+          env:
+            YC_TOKEN: ${{ secrets.OAUTH_TOKEN }}
           run: |
-            echo "${{ secrets.OAUTH_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
+            echo "$YC_TOKEN" | docker login \
+              --username oauth \
+              --password-stdin \
+              cr.yandex
 
         - name: Build and tag Docker image
           run: |
