@@ -108,7 +108,7 @@ jobs:
 
       - name: Create Release Issue
         run: |
-          CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          CURRENT_DATE=$(node -p "new Date().toISOString()")
           COMMITS_HISTORY=${{ steps.changelog.outputs.commits }}
           
           # Формируем тело Issue в переменной
