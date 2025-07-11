@@ -110,9 +110,11 @@ jobs:
         run: echo "current_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
     
       - name: Create Release Issue
+        env:
+          CURRENT_DATE: ${{ steps.date.outputs.current_date }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMITS_HISTORY: ${{ steps.changelog.outputs.commits }}
         run: |
-          CURRENT_DATE=${{ steps.date.outputs.current_date }}
-          COMMITS_HISTORY=${{ steps.changelog.outputs.commits }}
           
           # Формируем тело Issue в переменной
           BODY="**Release Information**
@@ -131,5 +133,3 @@ jobs:
           gh issue create \
             --title "Release v${{ github.run_number }}" \
             --body "$BODY"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
