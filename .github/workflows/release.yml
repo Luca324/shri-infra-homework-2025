@@ -53,9 +53,9 @@ jobs:
           env:
             YC_TOKEN: ${{ secrets.OAUTH_TOKEN }}
           run: |
-            echo "$YC_TOKEN" | docker login \
+            docker login \
               --username oauth \
-              --password-stdin \
+              --password $YC_TOKEN \
               cr.yandex
 
         - name: Build and tag Docker image
