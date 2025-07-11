@@ -1,3 +1,15 @@
+## v33
+
+- cbbfb7f Merge branch 'main' into test (Tanya)
+- 7818afd Merge branch 'test' of https://github.com/Luca324/shri-infra-homework-2025 into test (Luca324)
+- 0d645c0 not last but prev tag (Luca324)
+- 0f67c8c Merge pull request #19 from Luca324/test (Tanya)
+- dd22602 Merge branch 'main' into test (Tanya)
+- a51b45a Merge branch 'test' of https://github.com/Luca324/shri-infra-homework-2025 into test (Luca324)
+- 163c63e Update release.yml (Luca324)
+- a51c83c Update CHANGELOG.md for v30 (GitHub Actions)
+- 6ea6901 Merge pull request #15 from Luca324/test (Tanya)
+
 ## v30
 
 - 91212ae Merge branch 'test' of https://github.com/Luca324/shri-infra-homework-2025 into test (Luca324)
