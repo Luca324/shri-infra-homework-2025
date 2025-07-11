@@ -110,13 +110,7 @@ jobs:
         run: |
           gh issue create \
             --title "Release v${{ github.run_number }}" \
-            --body "$(cat <<EOF 
-              **Release Info**
-              - Version: ${{ github.run_number }}
-              - Docker Image: cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}
-
-              **Changes:**
-              ${{ steps.changelog.outputs.commits }}\nEOF)" \
+            --body "**Release Info**\n- Version: ${{ github.run_number }}\n- Docker Image: cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}\n\n**Changes:**\n${{ steps.changelog.outputs.commits }}" \
             --label "release"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
