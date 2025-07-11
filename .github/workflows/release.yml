@@ -116,9 +116,7 @@ jobs:
               - Docker Image: cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}
 
               **Changes:**
-              ${{ steps.changelog.outputs.commits }}
-              EOF
-            )" \
+              ${{ steps.changelog.outputs.commits }}\nEOF)" \
             --label "release"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
