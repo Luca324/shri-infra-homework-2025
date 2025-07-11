@@ -1,0 +1,20 @@
+## v28
+
+- d4347e6 Merge branch 'test' of https://github.com/Luca324/shri-infra-homework-2025 into test (Luca324)
+- eb3eab9 changelog (Luca324)
+- 8dfca8a Merge branch 'main' into test (Tanya)
+- 9396ea9 Update release.yml (Luca324)
+- fdd949e Update release.yml (Luca324)
+- 0de877c Update release.yml (Luca324)
+- 1c3c506 Update release.yml (Luca324)
+- 8c61870 Update release.yml (Luca324)
+- a5396ed Merge branch 'test' of https://github.com/Luca324/shri-infra-homework-2025 into test (Luca324)
+- 1736fa0 Update release.yml (Luca324)
+- aae4b3e Merge pull request #13 from Luca324/test (Tanya)
+- 80e0848 Merge branch 'main' into test (Tanya)
+- d617246 Update release.yml (Luca324)
+- 1fbdf4a Update release.yml (Luca324)
+- 505d76b Update release.yml (Luca324)
+- 92a4e95 Merge pull request #11 from Luca324/test (Tanya)
+
+
