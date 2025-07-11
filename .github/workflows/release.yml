@@ -43,3 +43,24 @@ jobs:
             git push origin releases/${{ github.run_number }}
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Авторизация
+    build-and-push:
+      needs: create-branch
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        
+        - name: Login to Yandex Container Registry
+          run: |
+            echo "${{ secrets.OAUTH_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
+
+        - name: Build and tag Docker image
+          run: |
+            docker build . \
+              -f Dockerfile \
+              -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }} \
+              -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}_latest
+
+        - name: Push Docker images
+          run: |
+            docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}
+            docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}_latest
