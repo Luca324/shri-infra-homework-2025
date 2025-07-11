@@ -109,27 +109,28 @@ jobs:
       - name: Create Release Issue
         run: |
           CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          BODY=$(cat <<EOF
-**Release Information**  
-- **Date**: $CURRENT_DATE  
-- **Author**: ${{ github.actor }}  
-- **Version**: ${{ github.run_number }}  
+          COMMITS_HISTORY=${{ steps.changelog.outputs.commits }}
+          
+          # Формируем тело Issue в переменной
+          BODY="**Release Information**
+          - **Date**: $CURRENT_DATE
+          - **Author**: ${{ github.actor }}
+          - **Version**: ${{ github.run_number }}
 
-**Docker Image**:  
-\`cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}\`  
+          **Docker Image**:
+          \`cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}\`
 
-**Changes since last release**:  
-${{ steps.changelog.outputs.commits }}
+          **Changes since last release**:
+          $COMMITS_HISTORY
 
-**Deployment Command**:  
-\`\`\`bash
-docker pull cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}
-\`\`\`
-EOF
-          )
+          **Deployment Command**:
+          \`\`\`bash
+          docker pull cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}
+          \`\`\`"
 
+          # Создаем Issue
           gh issue create \
             --title "Release v${{ github.run_number }}" \
-            --body "$BODY" 
+            --body "$BODY"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
