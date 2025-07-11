@@ -106,10 +106,30 @@ jobs:
           echo "$COMMITS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Create Issue with GH CLI
+      - name: Create Release Issue
         run: |
+          CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          BODY=$(cat <<EOF
+**Release Information**  
+- **Date**: $CURRENT_DATE  
+- **Author**: ${{ github.actor }}  
+- **Version**: ${{ github.run_number }}  
+
+**Docker Image**:  
+\`cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}\`  
+
+**Changes since last release**:  
+${{ steps.changelog.outputs.commits }}
+
+**Deployment Command**:  
+\`\`\`bash
+docker pull cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}
+\`\`\`
+EOF
+          )
+
           gh issue create \
             --title "Release v${{ github.run_number }}" \
-            --body "**Release Info**\n- Version: ${{ github.run_number }}\n- Docker Image: cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.run_number }}\n\n**Changes:**\n${{ steps.changelog.outputs.commits }}"
+            --body "$BODY" 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
