@@ -1,8 +1,5 @@
-name: Lint and Test
-on: 
-    pull_request:
-        branches:
-            - main
+name: Release
+on: [workflow_dispatch]
 
 jobs:
     lint:
@@ -31,3 +28,10 @@ jobs:
               run: npm ci
             - name: Test
               run: npm run test
+    branch: 
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Create branch
+              run: git branch releases/${{ github.run_number }}
+    
