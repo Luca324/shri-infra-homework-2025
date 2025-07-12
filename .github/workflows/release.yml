@@ -145,6 +145,7 @@ jobs:
           
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+          git checkout releases/${{ github.run_number}}
           git add CHANGELOG.md
           git commit -m "Update CHANGELOG.md for v${{ github.run_number}}"
           git push origin releases/${{ github.run_number}}
