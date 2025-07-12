@@ -151,6 +151,10 @@ jobs:
           
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add CHANGELOG.md
-          git commit -m "Update CHANGELOG.md for hotfix v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}"
-          git push
+          # Проверяем, есть ли изменения для коммита
+          if git diff-index --quiet HEAD; then
+            echo "No changes to CHANGELOG.md. Skipping commit and push."
+          else
+            git commit -m "Update CHANGELOG.md for hotfix v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}"
+            git push
+          fi
