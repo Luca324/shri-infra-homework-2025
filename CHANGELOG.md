@@ -1,3 +1,27 @@
+## v39
+
+- 36b9040 Merge pull request #38 from Luca324/releases/38 (Tanya)
+- ed8ff06 Merge branch 'main' into releases/38 (Tanya)
+- 027d716 Merge pull request #37 from Luca324/test (Tanya)
+- f4b6d3a Merge branch 'main' into test (Tanya)
+- 1549817 мажорное обновление (Luca324)
+- e8d5668 Update CHANGELOG.md for hotfix v38_fix12 (GitHub Actions)
+- 36d97e4 Update hotfix.yml (Tanya)
+- 1c863e2 Merge branch 'releases/38' of https://github.com/Luca324/shri-infra-homework-2025 into releases/38 (Luca324)
+- 055b41f Update hotfix.yml (Luca324)
+- aa56b80 Merge pull request #36 from Luca324/releases/38 (Tanya)
+- d6a00e7 Merge branch 'main' into releases/38 (Tanya)
+- 6217d6b Update hotfix.yml (Luca324)
+- 2402895 Update hotfix.yml (Luca324)
+- 61f85df Update hotfix.yml (Luca324)
+- 4c15bca Update hotfix.yml (Luca324)
+- 364ee65 Create срочный фикс (Luca324)
+- 46a6c02 Merge pull request #35 from Luca324/test (Tanya)
+- bc36ed5 Merge branch 'main' into test (Tanya)
+- 6fe4f7f Merge branch 'test' of https://github.com/Luca324/shri-infra-homework-2025 into test (Luca324)
+- b931b41 Create новый файл (Luca324)
+- 9568318 Update CHANGELOG.md for v38 (GitHub Actions)
+
 ## v38
 ### v38_fix12
 
