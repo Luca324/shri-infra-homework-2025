@@ -144,17 +144,19 @@ jobs:
         env:
           COMMITS_HISTORY: ${{ steps.changelog.outputs.commits }}
         run: |
-          CHANGELOG_ENTRY="### v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}\n\n$COMMITS_HISTORY\n\n"
-          
-          # Find the release section and append the hotfix
-          sed -i "/## v${{ github.event.inputs.release_version }}/a $CHANGELOG_ENTRY" CHANGELOG.md
-          
+        
           git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          # Проверяем, есть ли изменения для коммита
-          if git diff-index --quiet HEAD; then
-            echo "No changes to CHANGELOG.md. Skipping commit and push."
-          else
-            git commit -m "Update CHANGELOG.md for hotfix v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}"
-            git push
-          fi
+          git config --global user.email "actions@github.com"  
+          git checkout releases/${{ github.event.inputs.release_version }}
+
+          CHANGELOG_ENTRY="### v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}\n\n$COMMITS_HISTORY\n\n"
+
+          
+          sed -i "/## v${{ github.event.inputs.release_version }}/a $CHANGELOG_ENTRY" CHANGELOG.md
+
+          git add CHANGELOG.md
+
+          git commit -m "Update CHANGELOG.md for hotfix v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}"
+          git push origin releases/${{ github.event.inputs.release_version }}
+
+          
