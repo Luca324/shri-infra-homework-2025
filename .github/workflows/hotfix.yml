@@ -1,0 +1,154 @@
+name: Hotfix Release
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version to fix (e.g. 123)'
+        required: true
+        type: string
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 'releases/${{ github.event.inputs.release_version }}'
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+      - name: Install deps
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 'releases/${{ github.event.inputs.release_version }}'
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+      - name: Install deps
+        run: npm ci
+      - name: Test
+        run: npm run test
+
+  build-and-push:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 'releases/${{ github.event.inputs.release_version }}'
+
+      - name: Login to Yandex Container Registry
+        run: |
+          echo ${{ secrets.OAUTH_TOKEN }} | docker login \
+            --username oauth \
+            --password-stdin \
+            cr.yandex
+
+      - name: Build and tag Docker image
+        run: |
+          docker build . \
+            -f Dockerfile \
+            -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${{ github.run_number }} \
+            -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
+
+      - name: Push Docker images
+        run: |
+          docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${{ github.run_number }}
+          docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
+
+  create-tag:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 'releases/${{ github.event.inputs.release_version }}'
+          fetch-depth: 0
+
+      - name: Create hotfix tag
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git tag -a v${{ github.event.inputs.release_version }}_fix${{ github.run_number }} -m "Hotfix ${{ github.run_number }} for release ${{ github.event.inputs.release_version }}"
+          git push origin v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}
+
+  update-release-issue:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 'releases/${{ github.event.inputs.release_version }}'
+          fetch-depth: 0
+
+      - name: Get commit history for hotfix
+        id: changelog
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "")
+          if [[ "$LAST_TAG" == *"_fix"* ]]; then
+            # Если последний тег - это фикс, берем предыдущий релизный тег
+            BASE_TAG=$(echo $LAST_TAG | cut -d'_' -f1)
+            COMMITS=$(git log $LAST_TAG..HEAD --pretty=format:"- %h %s (%an)")
+          else
+            # Иначе берем последний релизный тег
+            COMMITS=$(git log $LAST_TAG..HEAD --pretty=format:"- %h %s (%an)")
+          fi
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Set current date
+        id: date
+        run: echo "current_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
+      - name: Find Release Issue
+        id: find-issue
+        run: |
+          ISSUE_ID=$(gh issue list --search "Release v${{ github.event.inputs.release_version }}" --json number -q '.[0].number')
+          echo "issue_id=$ISSUE_ID" >> $GITHUB_OUTPUT
+
+      - name: Add comment to Release Issue
+        env:
+          CURRENT_DATE: ${{ steps.date.outputs.current_date }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMITS_HISTORY: ${{ steps.changelog.outputs.commits }}
+        run: |
+          COMMENT="**Hotfix Information**
+          - **Date**: $CURRENT_DATE
+          - **Author**: ${{ github.actor }}
+          - **Version**: v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}
+
+          **Docker Image**:
+          \`cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${{ github.run_number }}\`
+
+          **Changes since last release/fix**:
+          $COMMITS_HISTORY
+          "
+
+          gh issue comment ${{ steps.find-issue.outputs.issue_id }} --body "$COMMENT"
+
+      - name: Update CHANGELOG.md
+        env:
+          COMMITS_HISTORY: ${{ steps.changelog.outputs.commits }}
+        run: |
+          CHANGELOG_ENTRY="### v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}\n\n$COMMITS_HISTORY\n\n"
+          
+          # Find the release section and append the hotfix
+          sed -i "/## v${{ github.event.inputs.release_version }}/a $CHANGELOG_ENTRY" CHANGELOG.md
+          
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add CHANGELOG.md
+          git commit -m "Update CHANGELOG.md for hotfix v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}"
+          git push
