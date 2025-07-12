@@ -158,6 +158,7 @@ jobs:
           \\
           " CHANGELOG.md
 
+          git add CHANGELOG.md
 
           # Проверяем, есть ли изменения для коммита
           if git diff-index --quiet HEAD; then
