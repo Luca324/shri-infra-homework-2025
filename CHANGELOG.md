@@ -1,3 +1,10 @@
+## v38
+
+- e41fdc5 Merge pull request #33 from Luca324/test (Tanya)
+- 1ed7ff6 Merge branch 'main' into test (Tanya)
+- 94b749a Merge branch 'test' of https://github.com/Luca324/shri-infra-homework-2025 into test (Luca324)
+- 45a2078 Update release.yml (Luca324)
+
 ## v33
 
 - cbbfb7f Merge branch 'main' into test (Tanya)
