@@ -114,6 +114,8 @@ jobs:
 
       - name: Find Release Issue
         id: find-issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ISSUE_ID=$(gh issue list --search "Release v${{ github.event.inputs.release_version }}" --json number -q '.[0].number')
           echo "issue_id=$ISSUE_ID" >> $GITHUB_OUTPUT
