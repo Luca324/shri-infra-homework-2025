@@ -69,14 +69,14 @@ jobs:
         run: |
           docker build . \
             -f Dockerfile \
-            -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix$FIX_NUM \
+            -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${FIX_NUM} \
             -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
 
       - name: Push Docker images
         env:
           FIX_NUM: ${{  steps.fixnum.outputs.fix_num }}
         run: |
-          docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix$FIX_NUM
+          docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${FIX_NUM}
           docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
 
   create-tag:
@@ -104,8 +104,8 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git tag -a v${{ github.event.inputs.release_version }}_fix$FIX_NUM -m "Hotfix $FIX_NUM for release ${{ github.event.inputs.release_version }}"
-          git push origin v${{ github.event.inputs.release_version }}_fix$FIX_NUM
+          git tag -a v${{ github.event.inputs.release_version }}_fix${FIX_NUM} -m "Hotfix ${FIX_NUM} for release ${{ github.event.inputs.release_version }}"
+          git push origin v${{ github.event.inputs.release_version }}_fix${FIX_NUM}
 
   comment-release-issue:
     needs: [lint, test]
@@ -164,10 +164,10 @@ jobs:
           COMMENT="**Hotfix Information**
           - **Date**: $CURRENT_DATE
           - **Author**: ${{ github.actor }}
-          - **Version**: v$RELEASE_VERSION_fix$FIX_NUM
+          - **Version**: v${RELEASE_VERSION}_fix${FIX_NUM}
 
           **Docker Image**:
-          \`cr.yandex/${{ secrets.REGISTRY_ID }}/app:$RELEASE_VERSION_fix$FIX_NUM\`
+          \`cr.yandex/${{ secrets.REGISTRY_ID }}/app:${RELEASE_VERSION}_fix${FIX_NUM}\`
 
           **Changes since last release/fix**:
           $COMMITS_HISTORY
@@ -184,14 +184,14 @@ jobs:
 
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git checkout releases/$RELEASE_VERSION
+          git checkout releases/${RELEASE_VERSION}
 
           # Форматируем COMMITS_HISTORY для безопасной вставки в sed
           FORMATTED_COMMITS=$(echo "$COMMITS_HISTORY" | sed ':a;N;$!ba;s/\n/\\n/g')
 
           # Добавляем запись в CHANGELOG.md
-          sed -i "0,/## v$RELEASE_VERSION/!b; /## v$RELEASE_VERSION/a \\
-          ### v$RELEASE_VERSION_fix$FIX_NUM\\
+          sed -i "0,/## v${RELEASE_VERSION}/!b; /## v${RELEASE_VERSION}/a \\
+          ### v${RELEASE_VERSION}_fix${FIX_NUM}\\
           \\
           ${FORMATTED_COMMITS}\\
           " CHANGELOG.md
@@ -199,6 +199,6 @@ jobs:
 
           git add CHANGELOG.md
 
-          git commit -m "Update CHANGELOG.md for hotfix v$RELEASE_VERSION_fix$FIX_NUM"
-          git push origin releases/$RELEASE_VERSION
+          git commit -m "Update CHANGELOG.md for hotfix v${RELEASE_VERSION}_fix${FIX_NUM}"
+          git push origin releases/${RELEASE_VERSION}
 
