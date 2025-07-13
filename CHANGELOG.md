@@ -1,4 +1,9 @@
 ## v39
+### v39_fix14
+
+- 1ae3a30 Update hotfix.yml (Luca324)
+
+
 
 - 36b9040 Merge pull request #38 from Luca324/releases/38 (Tanya)
 - ed8ff06 Merge branch 'main' into releases/38 (Tanya)
