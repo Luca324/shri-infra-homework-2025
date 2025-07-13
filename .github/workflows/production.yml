@@ -1,0 +1,46 @@
+name: Production
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version to run (e.g. 123)'
+        required: true
+        type: string
+
+jobs:
+  check-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login into docker
+        run: |
+            ssh -i ${{ secrets.OPENSSH_PRIVATE_KEY }} ${{ secrets.PUBLIC_IP }}
+            echo "${{ secrets.OAUTH_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
+
+      - name: Check if image exists in Container Registry
+        run: |
+          if docker manifest inspect cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest > /dev/null 2>&1; then
+            echo "Image exists"
+          else
+            echo "Image does not exist"
+            exit 1
+          fi
+      
+  run-docker:
+    needs: check-image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login into docker
+        run: |
+            ssh -i ${{ secrets.OPENSSH_PRIVATE_KEY }} ${{ secrets.PUBLIC_IP }}
+            echo "${{ secrets.OAUTH_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
+
+      - name: Run Docker
+        run: |
+            docker pull cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
+            docker run -d -p 80:3000 cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
+  
+  comment-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name:  Add comment to issue
+        run: 
