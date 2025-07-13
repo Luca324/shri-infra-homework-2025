@@ -48,6 +48,14 @@ jobs:
         with:
           ref: 'releases/${{ github.event.inputs.release_version }}'
 
+      - name: Set hotfix number
+        id: fixnum
+        run: |
+          # Получаем последний номер фикса
+          LAST_FIX_NUM=$(grep -m 1 -o "### v${RELEASE_VERSION}_fix[0-9]\+" CHANGELOG.md | grep -o '[0-9]\+' || echo "0")
+          NEXT_FIX_NUM=$((LAST_FIX_NUM + 1))
+          echo "fix_num=${NEXT_FIX_NUM}" >> $GITHUB_OUTPUT
+        
       - name: Login to Yandex Container Registry
         run: |
           echo ${{ secrets.OAUTH_TOKEN }} | docker login \
@@ -59,12 +67,14 @@ jobs:
         run: |
           docker build . \
             -f Dockerfile \
-            -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${{ github.run_number }} \
+            -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix$FIX_NUM \
             -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
 
       - name: Push Docker images
+        env:
+          FIX_NUM: ${{  steps.fixnum.outputs.fix_num }}
         run: |
-          docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${{ github.run_number }}
+          docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix$FIX_NUM
           docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
 
   create-tag:
@@ -76,12 +86,24 @@ jobs:
           ref: 'releases/${{ github.event.inputs.release_version }}'
           fetch-depth: 0
 
+          
+      - name: Set hotfix number
+        id: fixnum
+        run: |
+          # Получаем последний номер фикса
+          LAST_FIX_NUM=$(grep -m 1 -o "### v${RELEASE_VERSION}_fix[0-9]\+" CHANGELOG.md | grep -o '[0-9]\+' || echo "0")
+          NEXT_FIX_NUM=$((LAST_FIX_NUM + 1))
+          echo "fix_num=${NEXT_FIX_NUM}" >> $GITHUB_OUTPUT
+        
+
       - name: Create hotfix tag
+        env:
+            FIX_NUM: ${{  steps.fixnum.outputs.fix_num }}
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git tag -a v${{ github.event.inputs.release_version }}_fix${{ github.run_number }} -m "Hotfix ${{ github.run_number }} for release ${{ github.event.inputs.release_version }}"
-          git push origin v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}
+          git tag -a v${{ github.event.inputs.release_version }}_fix$FIX_NUM -m "Hotfix $FIX_NUM for release ${{ github.event.inputs.release_version }}"
+          git push origin v${{ github.event.inputs.release_version }}_fix$FIX_NUM
 
   comment-release-issue:
     needs: [lint, test]
