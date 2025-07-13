@@ -1,6 +1,10 @@
 ## v39
 ### v39_fix1
 
+- 3c97cb8 Update CHANGELOG.md for hotfix v39_fix18 (GitHub Actions)
+
+### v39_fix1
+
 - e7bcae9 Merge branch 'releases/39' of https://github.com/Luca324/shri-infra-homework-2025 into releases/39 (Luca324)
 - 697e71a Update production.yml (Luca324)
 - 7bd8747 Update CHANGELOG.md for hotfix v39_fix17 (GitHub Actions)
