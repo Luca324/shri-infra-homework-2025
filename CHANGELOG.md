@@ -1,4 +1,9 @@
 ## v42
+### v42_fix1
+
+- 129a4e3 Update hotfix.yml (Luca324)
+- 79fa007 Update CHANGELOG.md for v42 (GitHub Actions)
+
 
 - 78e135b Merge branch 'releases/41' of https://github.com/Luca324/shri-infra-homework-2025 into releases/41 (Luca324)
 - 20f3931 Update hotfix.yml (Luca324)
