@@ -1,3 +1,38 @@
+## v41
+
+- cfa67cc Update CHANGELOG.md for hotfix v40_fix2 (GitHub Actions)
+- 4173ab2 Update hotfix.yml (Luca324)
+- 60dc2c1 Update hotfix.yml (Luca324)
+- 76091f5 Merge branch 'releases/40' of https://github.com/Luca324/shri-infra-homework-2025 into releases/40 (Luca324)
+- 0c590b2 Update hotfix.yml (Luca324)
+- c9e7133 Update CHANGELOG.md for hotfix v40_fix (GitHub Actions)
+- 2962086 Update CHANGELOG.md for hotfix v40_fix (GitHub Actions)
+- 08b29c0 Update CHANGELOG.md for hotfix v40_fix (GitHub Actions)
+- 31b8b4b Merge branch 'releases/40' of https://github.com/Luca324/shri-infra-homework-2025 into releases/40 (Luca324)
+- fdfa3bf Update hotfix.yml (Luca324)
+- 75fe8ec Update CHANGELOG.md for hotfix v40_fix (GitHub Actions)
+- 7c2afcf Merge branch 'releases/40' of https://github.com/Luca324/shri-infra-homework-2025 into releases/40 (Luca324)
+- 17917b9 Update hotfix.yml (Luca324)
+- 6f6b91c Update CHANGELOG.md for hotfix v40_fix1 (GitHub Actions)
+- 08dc86b Merge branch 'releases/40' of https://github.com/Luca324/shri-infra-homework-2025 into releases/40 (Luca324)
+- ea40711 Update hotfix.yml (Luca324)
+- f05ebf8 Update CHANGELOG.md for hotfix v40_fix41 (GitHub Actions)
+- 3e6901c Merge branch 'releases/40' of https://github.com/Luca324/shri-infra-homework-2025 into releases/40 (Luca324)
+- a78fbb2 Update hotfix.yml (Luca324)
+- 6a35b1d Update CHANGELOG.md for hotfix v40_fix1 (GitHub Actions)
+- bf4ccaf Merge branch 'releases/40' of https://github.com/Luca324/shri-infra-homework-2025 into releases/40 (Luca324)
+- 6bfea25 Update hotfix.yml (Luca324)
+- 72e524d Update CHANGELOG.md for hotfix v40_fix1 (GitHub Actions)
+- 200d89e Merge branch 'releases/40' of https://github.com/Luca324/shri-infra-homework-2025 into releases/40 (Luca324)
+- 5fb4400 Update hotfix.yml (Luca324)
+- 0ed85f4 Update CHANGELOG.md for hotfix v1 (GitHub Actions)
+- 0523d29 Merge branch 'releases/40' of https://github.com/Luca324/shri-infra-homework-2025 into releases/40 (Luca324)
+- 50bf71c . (Luca324)
+- dcb004f Update CHANGELOG.md for hotfix v1 (GitHub Actions)
+- 2517345 Merge branch 'releases/39' into releases/40 (Luca324)
+- 81d2782 Update production.yml (Luca324)
+- 3eda086 Update CHANGELOG.md for v40 (GitHub Actions)
+
 ## v40
 ### v40_fix2
 
