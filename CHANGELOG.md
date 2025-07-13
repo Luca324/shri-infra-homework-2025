@@ -1,6 +1,12 @@
 ## v40
 ### v40_fix
 
+- 31b8b4b Merge branch 'releases/40' of https://github.com/Luca324/shri-infra-homework-2025 into releases/40 (Luca324)
+- fdfa3bf Update hotfix.yml (Luca324)
+- 75fe8ec Update CHANGELOG.md for hotfix v40_fix (GitHub Actions)
+
+### v40_fix
+
 - 7c2afcf Merge branch 'releases/40' of https://github.com/Luca324/shri-infra-homework-2025 into releases/40 (Luca324)
 - 17917b9 Update hotfix.yml (Luca324)
 - 6f6b91c Update CHANGELOG.md for hotfix v40_fix1 (GitHub Actions)
