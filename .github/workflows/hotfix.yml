@@ -51,7 +51,7 @@ jobs:
       - name: Set hotfix number
         id: fixnum
         run: |
-          LAST_FIX_NUM=$(sed -n 's/.*v40_fix\([0-9]\+\).*/\1/p' CHANGELOG.md | head -1 || echo "0")
+          LAST_FIX_NUM=$(sed -n 's/.*v${{ github.event.inputs.release_version }}_fix\([0-9]\+\).*/\1/p' CHANGELOG.md | head -1 || echo "0")
           NEXT_FIX_NUM=$((LAST_FIX_NUM + 1))
           echo "fix_num=${NEXT_FIX_NUM}" >> $GITHUB_OUTPUT
           echo "DEBUG: Calculated fix_num=${NEXT_FIX_NUM}"
