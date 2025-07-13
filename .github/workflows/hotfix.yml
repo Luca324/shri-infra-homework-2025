@@ -55,8 +55,12 @@ jobs:
           LAST_FIX_NUM=$(grep -m 1 -o "### v${RELEASE_VERSION}_fix[0-9]\+" CHANGELOG.md | grep -o '[0-9]\+' || echo "0")
           NEXT_FIX_NUM=$((LAST_FIX_NUM + 1))
           echo "fix_num=${NEXT_FIX_NUM}" >> $GITHUB_OUTPUT
-          echo "fix_num=${NEXT_FIX_NUM}"
-        
+          echo "DEBUG: Calculated fix_num=${NEXT_FIX_NUM}"  # теперь это будет в логах
+
+      - name: Verify fix_num
+        run: |
+          echo "Stored fix_num: ${{ steps.fixnum.outputs.fix_num }}"
+
       - name: Login to Yandex Container Registry
         run: |
           echo ${{ secrets.OAUTH_TOKEN }} | docker login \
@@ -149,7 +153,7 @@ jobs:
         id: fixnum
         run: |
           # Получаем последний номер фикса
-          LAST_FIX_NUM=$(grep -m 1 -o "### v${RELEASE_VERSION}_fix[0-9]\+" CHANGELOG.md | grep -o '[0-9]\+' || echo "0")
+          LAST_FIX_NUM=$(grep -o "### v${{ github.event.inputs.release_version }}_fix[0-9]\+" CHANGELOG.md | grep -o '[0-9]\+' | sort -nr | head -n 1 || echo "0")
           NEXT_FIX_NUM=$((LAST_FIX_NUM + 1))
           echo "fix_num=${NEXT_FIX_NUM}" >> $GITHUB_OUTPUT
         
