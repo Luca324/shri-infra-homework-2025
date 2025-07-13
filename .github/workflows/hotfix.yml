@@ -40,49 +40,49 @@ jobs:
   #     - name: Test
   #       run: npm run test
 
-  build-and-push:
-    # needs: [lint, test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: 'releases/${{ github.event.inputs.release_version }}'
+  # build-and-push:
+  #   # needs: [lint, test]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         ref: 'releases/${{ github.event.inputs.release_version }}'
 
-      - name: Set hotfix number
-        id: fixnum
-        run: |
-          # Получаем последний номер фикса
-          LAST_FIX_NUM=$(sed -n 's/.*v${{ github.event.inputs.release_version }}_fix\([0-9]\+\).*/\1/p' CHANGELOG.md | head -1 || echo "0")
-          NEXT_FIX_NUM=$((LAST_FIX_NUM + 1))
-          echo "fix_num=${NEXT_FIX_NUM}" >> $GITHUB_OUTPUT
-          echo "DEBUG: Calculated fix_num=${NEXT_FIX_NUM}" 
+  #     - name: Set hotfix number
+  #       id: fixnum
+  #       run: |
+  #         # Получаем последний номер фикса
+  #         LAST_FIX_NUM=$(sed -n 's/.*v${{ github.event.inputs.release_version }}_fix\([0-9]\+\).*/\1/p' CHANGELOG.md | head -1 || echo "0")
+  #         NEXT_FIX_NUM=$((LAST_FIX_NUM + 1))
+  #         echo "fix_num=${NEXT_FIX_NUM}" >> $GITHUB_OUTPUT
+  #         echo "DEBUG: Calculated fix_num=${NEXT_FIX_NUM}" 
 
-      - name: Verify fix_num
-        run: |
-          echo "Stored fix_num: ${{ steps.fixnum.outputs.fix_num }}"
+  #     - name: Verify fix_num
+  #       run: |
+  #         echo "Stored fix_num: ${{ steps.fixnum.outputs.fix_num }}"
 
-      - name: Login to Yandex Container Registry
-        run: |
-          echo ${{ secrets.OAUTH_TOKEN }} | docker login \
-            --username oauth \
-            --password-stdin \
-            cr.yandex
+  #     - name: Login to Yandex Container Registry
+  #       run: |
+  #         echo ${{ secrets.OAUTH_TOKEN }} | docker login \
+  #           --username oauth \
+  #           --password-stdin \
+  #           cr.yandex
 
-      - name: Build and tag Docker image
-        env:
-          FIX_NUM: ${{  steps.fixnum.outputs.fix_num }}
-        run: |
-          docker build . \
-            -f Dockerfile \
-            -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${FIX_NUM} \
-            -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
+  #     - name: Build and tag Docker image
+  #       env:
+  #         FIX_NUM: ${{  steps.fixnum.outputs.fix_num }}
+  #       run: |
+  #         docker build . \
+  #           -f Dockerfile \
+  #           -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${FIX_NUM} \
+  #           -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
 
-      - name: Push Docker images
-        env:
-          FIX_NUM: ${{  steps.fixnum.outputs.fix_num }}
-        run: |
-          docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${FIX_NUM}
-          docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
+  #     - name: Push Docker images
+  #       env:
+  #         FIX_NUM: ${{  steps.fixnum.outputs.fix_num }}
+  #       run: |
+  #         docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${FIX_NUM}
+  #         docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
 
   create-tag:
     # needs: [lint, test]
