@@ -8,37 +8,38 @@ on:
         type: string
 
 jobs:
-  # lint:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: 'releases/${{ github.event.inputs.release_version }}'
-  #     - name: Use Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: "20.x"
-  #         cache: "npm"
-  #     - name: Install deps
-  #       run: npm ci
-  #     - name: Lint
-  #       run: npm run lint
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 'releases/${{ github.event.inputs.release_version }}'
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+      - name: Install deps
+        run: npm ci
+      - name: Lint
+        run: npm run lint
 
-  # test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: 'releases/${{ github.event.inputs.release_version }}'
-  #     - name: Use Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: "20.x"
-  #         cache: "npm"
-  #     - name: Install deps
-  #       run: npm ci
-  #     - name: Test
-  #       run: npm run test
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 'releases/${{ github.event.inputs.release_version }}'
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+      - name: Install deps
+        run: npm ci
+      - name: Test
+        run: npm run test
+        
   calculate-hotfix-number:
     runs-on: ubuntu-latest
     outputs:
@@ -56,44 +57,43 @@ jobs:
           echo "fix_num=${NEXT_FIX_NUM}" >> $GITHUB_OUTPUT
           echo "DEBUG: Calculated fix_num=${NEXT_FIX_NUM}"
 
-  # build-and-push:
-  #   needs: [lint, test, calculate-hotfix-number]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: 'releases/${{ github.event.inputs.release_version }}'
+  build-and-push:
+    needs: [lint, test, calculate-hotfix-number]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 'releases/${{ github.event.inputs.release_version }}'
 
-  #     - name: Verify fix_num
-  #       run: |
-  #         echo "Stored fix_num: ${{ needs.calculate-hotfix-number.outputs.fix_num }}"
+      - name: Verify fix_num
+        run: |
+          echo "Stored fix_num: ${{ needs.calculate-hotfix-number.outputs.fix_num }}"
 
-  #     - name: Login to Yandex Container Registry
-  #       run: |
-  #         echo ${{ secrets.OAUTH_TOKEN }} | docker login \
-  #           --username oauth \
-  #           --password-stdin \
-  #           cr.yandex
+      - name: Login to Yandex Container Registry
+        run: |
+          echo ${{ secrets.OAUTH_TOKEN }} | docker login \
+            --username oauth \
+            --password-stdin \
+            cr.yandex
 
-  #     - name: Build and tag Docker image
-  #       env:
-  #         FIX_NUM: ${{ needs.calculate-hotfix-number.outputs.fix_num }}
-  #       run: |
-  #         docker build . \
-  #           -f Dockerfile \
-  #           -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${FIX_NUM} \
-  #           -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
+      - name: Build and tag Docker image
+        env:
+          FIX_NUM: ${{ needs.calculate-hotfix-number.outputs.fix_num }}
+        run: |
+          docker build . \
+            -f Dockerfile \
+            -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${FIX_NUM} \
+            -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
 
-  #     - name: Push Docker images
-  #       env:
-  #         FIX_NUM: ${{ needs.calculate-hotfix-number.outputs.fix_num }}
-  #       run: |
-  #         docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${FIX_NUM}
-  #         docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
+      - name: Push Docker images
+        env:
+          FIX_NUM: ${{ needs.calculate-hotfix-number.outputs.fix_num }}
+        run: |
+          docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${FIX_NUM}
+          docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
 
   create-tag:
-    # needs: [lint, test]
-    needs: calculate-hotfix-number
+    needs: [lint, test, calculate-hotfix-number]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -115,8 +115,7 @@ jobs:
           git push origin v${{ github.event.inputs.release_version }}_fix${FIX_NUM}
 
   comment-release-issue:
-    # needs: [lint, test]
-    needs: calculate-hotfix-number
+    needs: [lint, test, calculate-hotfix-number]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
