@@ -1,6 +1,12 @@
 ## v40
 ### v1
 
+- 0523d29 Merge branch 'releases/40' of https://github.com/Luca324/shri-infra-homework-2025 into releases/40 (Luca324)
+- 50bf71c . (Luca324)
+- dcb004f Update CHANGELOG.md for hotfix v1 (GitHub Actions)
+
+### v1
+
 - 2517345 Merge branch 'releases/39' into releases/40 (Luca324)
 - 81d2782 Update production.yml (Luca324)
 - 3eda086 Update CHANGELOG.md for v40 (GitHub Actions)
