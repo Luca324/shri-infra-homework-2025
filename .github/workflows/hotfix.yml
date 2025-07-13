@@ -55,6 +55,7 @@ jobs:
           LAST_FIX_NUM=$(grep -m 1 -o "### v${RELEASE_VERSION}_fix[0-9]\+" CHANGELOG.md | grep -o '[0-9]\+' || echo "0")
           NEXT_FIX_NUM=$((LAST_FIX_NUM + 1))
           echo "fix_num=${NEXT_FIX_NUM}" >> $GITHUB_OUTPUT
+          echo "fix_num=${NEXT_FIX_NUM}"
         
       - name: Login to Yandex Container Registry
         run: |
