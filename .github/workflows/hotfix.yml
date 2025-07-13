@@ -64,6 +64,8 @@ jobs:
             cr.yandex
 
       - name: Build and tag Docker image
+        env:
+          FIX_NUM: ${{  steps.fixnum.outputs.fix_num }}
         run: |
           docker build . \
             -f Dockerfile \
