@@ -11,27 +11,28 @@ jobs:
   check-image:
     runs-on: ubuntu-latest
     steps:
-      - name: Login into docker
+      - name: Login to Yandex Container Registry
         run: |
-            ssh -i ${{ secrets.OPENSSH_PRIVATE_KEY }} ${{ secrets.PUBLIC_IP }}
-            echo "${{ secrets.OAUTH_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
+          echo "${{ secrets.OAUTH_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
 
-      - name: Check if image exists in Container Registry
+      - name: Check if image exists
         run: |
-          if docker manifest inspect cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest > /dev/null 2>&1; then
-            echo "Image exists"
-          else
-            echo "Image does not exist"
-            exit 1
-          fi
+          docker manifest inspect cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest >/dev/null 2>&1 || exit 1
       
   run-docker:
     needs: check-image
     runs-on: ubuntu-latest
     steps:
-      - name: Login into docker
+      - name: Configure SSH and connect
         run: |
-            ssh -i ${{ secrets.OPENSSH_PRIVATE_KEY }} ${{ secrets.PUBLIC_IP }}
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.OPENSSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan ${{ secrets.PUBLIC_IP }} >> ~/.ssh/known_hosts
+          ssh tatyana@${{ secrets.PUBLIC_IP }} "echo 'SSH connection established'"
+      
+      - name: Login to Yandex Container Registry
+        run: |
             echo "${{ secrets.OAUTH_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
 
       - name: Run Docker
@@ -42,7 +43,11 @@ jobs:
   comment-release-issue:
     runs-on: ubuntu-latest
     steps:
-      
+      - uses: actions/checkout@v4
+        with:
+          ref: 'releases/${{ github.event.inputs.release_version }}'
+          fetch-depth: 0
+
       - name: Set current date
         id: date
         run: echo "current_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT

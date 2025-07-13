@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       release_version:
-        description: 'Release version to fix (e.g. 123)'
+        description: "Release version to fix (e.g. 123)"
         required: true
         type: string
 
@@ -39,14 +39,34 @@ jobs:
         run: npm ci
       - name: Test
         run: npm run test
+  calculate-hotfix-number:
+    runs-on: ubuntu-latest
+    outputs:
+      fix_num: ${{ steps.fixnum.outputs.fix_num }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "releases/${{ github.event.inputs.release_version }}"
+
+      - name: Set hotfix number
+        id: fixnum
+        run: |
+          LAST_FIX_NUM=$(sed -n 's/.*v${{ github.event.inputs.release_version }}_fix\([0-9]\+\).*/\1/p' CHANGELOG.md | head -1 || echo "0")
+          NEXT_FIX_NUM=$((LAST_FIX_NUM + 1))
+          echo "fix_num=${NEXT_FIX_NUM}" >> $GITHUB_OUTPUT
+          echo "DEBUG: Calculated fix_num=${NEXT_FIX_NUM}"
 
   build-and-push:
-    needs: [lint, test]
+    needs: [lint, test, calculate-hotfix-number]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: 'releases/${{ github.event.inputs.release_version }}'
+
+      - name: Verify fix_num
+        run: |
+          echo "Stored fix_num: ${{ needs.calculate-hotfix-number.outputs.fix_num }}"
 
       - name: Login to Yandex Container Registry
         run: |
@@ -56,40 +76,50 @@ jobs:
             cr.yandex
 
       - name: Build and tag Docker image
+        env:
+          FIX_NUM: ${{ needs.calculate-hotfix-number.outputs.fix_num }}
         run: |
           docker build . \
             -f Dockerfile \
-            -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${{ github.run_number }} \
+            -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${FIX_NUM} \
             -t cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
 
       - name: Push Docker images
+        env:
+          FIX_NUM: ${{ needs.calculate-hotfix-number.outputs.fix_num }}
         run: |
-          docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${{ github.run_number }}
+          docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${FIX_NUM}
           docker push cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_latest
 
   create-tag:
-    needs: [lint, test]
+    needs: [lint, test, calculate-hotfix-number]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 'releases/${{ github.event.inputs.release_version }}'
+          ref: "releases/${{ github.event.inputs.release_version }}"
           fetch-depth: 0
 
+      - name: Verify fix_num
+        run: |
+          echo "Stored fix_num: ${{ needs.calculate-hotfix-number.outputs.fix_num }}"
+
       - name: Create hotfix tag
+        env:
+          FIX_NUM: ${{ needs.calculate-hotfix-number.outputs.fix_num }}
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git tag -a v${{ github.event.inputs.release_version }}_fix${{ github.run_number }} -m "Hotfix ${{ github.run_number }} for release ${{ github.event.inputs.release_version }}"
-          git push origin v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}
+          git tag -a v${{ github.event.inputs.release_version }}_fix${FIX_NUM} -m "Hotfix ${FIX_NUM} for release ${{ github.event.inputs.release_version }}"
+          git push origin v${{ github.event.inputs.release_version }}_fix${FIX_NUM}
 
   comment-release-issue:
-    needs: [lint, test]
+    needs: [lint, test, calculate-hotfix-number]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 'releases/${{ github.event.inputs.release_version }}'
+          ref: "releases/${{ github.event.inputs.release_version }}"
           fetch-depth: 0
 
       - name: Get commit history for hotfix
@@ -120,19 +150,25 @@ jobs:
           ISSUE_ID=$(gh issue list --search "Release v${{ github.event.inputs.release_version }}" --json number -q '.[0].number')
           echo "issue_id=$ISSUE_ID" >> $GITHUB_OUTPUT
 
+      - name: Verify fix_num
+        run: |
+          echo "Stored fix_num: ${{ needs.calculate-hotfix-number.outputs.fix_num }}"
+
       - name: Add comment to Release Issue
         env:
           CURRENT_DATE: ${{ steps.date.outputs.current_date }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COMMITS_HISTORY: ${{ steps.changelog.outputs.commits }}
+          FIX_NUM: ${{ needs.calculate-hotfix-number.outputs.fix_num }}
+          RELEASE_VERSION: ${{ github.event.inputs.release_version }}
         run: |
           COMMENT="**Hotfix Information**
           - **Date**: $CURRENT_DATE
           - **Author**: ${{ github.actor }}
-          - **Version**: v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}
+          - **Version**: v${RELEASE_VERSION}_fix${FIX_NUM}
 
           **Docker Image**:
-          \`cr.yandex/${{ secrets.REGISTRY_ID }}/app:${{ github.event.inputs.release_version }}_fix${{ github.run_number }}\`
+          \`cr.yandex/${{ secrets.REGISTRY_ID }}/app:${RELEASE_VERSION}_fix${FIX_NUM}\`
 
           **Changes since last release/fix**:
           $COMMITS_HISTORY
@@ -143,22 +179,20 @@ jobs:
       - name: Update CHANGELOG.md
         env:
           COMMITS_HISTORY: ${{ steps.changelog.outputs.commits }}
+          FIX_NUM: ${{ needs.calculate-hotfix-number.outputs.fix_num }}
+          RELEASE_VERSION: ${{ github.event.inputs.release_version }}
         run: |
 
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git checkout releases/${{ github.event.inputs.release_version }}
+          git checkout releases/${RELEASE_VERSION}
 
           # Форматируем COMMITS_HISTORY для безопасной вставки в sed
           FORMATTED_COMMITS=$(echo "$COMMITS_HISTORY" | sed ':a;N;$!ba;s/\n/\\n/g')
 
-          # Получаем последний номер фикса
-          LAST_FIX_NUM=$(grep -m 1 -o "### v${RELEASE_VERSION}_fix[0-9]\+" CHANGELOG.md | grep -o '[0-9]\+' || echo "0")
-          NEXT_FIX_NUM=$((LAST_FIX_NUM + 1))
-
           # Добавляем запись в CHANGELOG.md
-          sed -i "0,/## v${{ github.event.inputs.release_version }}/!b; /## v${{ github.event.inputs.release_version }}/a \\
-          ### v${{ github.event.inputs.release_version }}_fix${NEXT_FIX_NUM}\\
+          sed -i "0,/## v${RELEASE_VERSION}/!b; /## v${RELEASE_VERSION}/a \\
+          ### v${RELEASE_VERSION}_fix${FIX_NUM}\\
           \\
           ${FORMATTED_COMMITS}\\
           " CHANGELOG.md
@@ -166,6 +200,5 @@ jobs:
 
           git add CHANGELOG.md
 
-          git commit -m "Update CHANGELOG.md for hotfix v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}"
-          git push origin releases/${{ github.event.inputs.release_version }}
-
+          git commit -m "Update CHANGELOG.md for hotfix v${RELEASE_VERSION}_fix${FIX_NUM}"
+          git push origin releases/${RELEASE_VERSION}
