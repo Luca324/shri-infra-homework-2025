@@ -152,9 +152,13 @@ jobs:
           # Форматируем COMMITS_HISTORY для безопасной вставки в sed
           FORMATTED_COMMITS=$(echo "$COMMITS_HISTORY" | sed ':a;N;$!ba;s/\n/\\n/g')
 
-          # Find the release section and append the hotfix
+          # Получаем последний номер фикса для текущей версии
+          LAST_FIX_NUM=$(grep -o "### v${{ github.event.inputs.release_version }}_fix[0-9]\+" CHANGELOG.md | tail -n 1 | grep -o '[0-9]\+' || echo "0")
+          NEXT_FIX_NUM=$((LAST_FIX_NUM + 1))
+
+          # Добавляем запись в CHANGELOG.md
           sed -i "/## v${{ github.event.inputs.release_version }}/a \\
-          ### v${{ github.event.inputs.release_version }}_fix${{ github.run_number }}\\
+          ### v${{ github.event.inputs.release_version }}_fix$NEXT_FIX_NUM\\
           \\
           $FORMATTED_COMMITS\\
           \\
