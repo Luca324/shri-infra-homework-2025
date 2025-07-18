@@ -1,4 +1,8 @@
 ## v43
+### v43_fix1
+
+- b7b409d Update CHANGELOG.md for v43 (GitHub Actions)
+
 
 - 40676b2 Merge pull request #46 from Luca324/Luca324-patch-1 (Tanya)
 - 4bf5afc Update README.md (Tanya)
