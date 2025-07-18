@@ -1,3 +1,14 @@
+## v43
+
+- 40676b2 Merge pull request #46 from Luca324/Luca324-patch-1 (Tanya)
+- 4bf5afc Update README.md (Tanya)
+- 1ef1c1d Merge pull request #45 from Luca324/releases/42 (Tanya)
+- 203ac70 Merge branch 'main' into releases/42 (Tanya)
+- e1873fc Update CHANGELOG.md for hotfix v42_fix1 (GitHub Actions)
+- 129a4e3 Update hotfix.yml (Luca324)
+- 79fa007 Update CHANGELOG.md for v42 (GitHub Actions)
+- 2ecee1f Merge pull request #40 from Luca324/releases/39 (Tanya)
+
 ## v42
 ### v42_fix1
 
